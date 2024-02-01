@@ -1,6 +1,6 @@
-﻿
 
-from Function import show, save, game, find, add, edit
+
+from Function import show, save, game, find, add, edit,failist_to_dict
 
 
 
@@ -40,4 +40,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
