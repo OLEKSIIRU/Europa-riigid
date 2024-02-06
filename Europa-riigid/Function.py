@@ -1,41 +1,48 @@
 ﻿from random import *
 
 def failist_to_dict(f:str):
-    riik_pealinn={}
-    pealinn_riik={}
-    riigid=[]
-    file=open(f,'r',encoding="utf8")
-    for line in file:
-        k,v=line.strip().split('-')
-        riik_pealinn[k]=v
-        pealinn_riik=[v]=k
-        riigid.append(k)
-    file.close()
-    return riik_pealinn,pealinn_riik,riigid
+    riik_pealinn = {}
+    pealinn_riik = {}
+    riigid = []
+
+    with open(f, 'r', encoding="utf8") as file:
+        for line in file:
+            parts = line.strip().split('-')
+            if len(parts) == 2:
+                k, v = parts
+                riik_pealinn[k] = v
+                pealinn_riik[v] = k
+                riigid.append(k)
+            else:
+                print(f"Ошибка в строке: {line}")
+
+    return riik_pealinn, pealinn_riik, riigid
 
 
-def show():
+
+
+riik_pealinn, pealinn_riik, riigid = failist_to_dict("Europa.txt")
+
+def show(riik_pealinn):
     i = 0
     for x in riik_pealinn:
         i += 1
         print(f"{i}: {x} - {riik_pealinn[x]}")
-
     print()
 
-def save():
-    max_len = len(list(riik_pealinn.keys()))
-    with open("Europa.txt", 'w') as f:
-        f.write("")
-    
-    with open("Europa.txt", 'a') as f:
-        for x in range(max_len):
-            f.write(f"{list(riik_pealinn.keys())[x]}-{list(riik_pealinn.values())[x]}\n")
 
-def game():
+def save(riik_pealinn):
+    with open("Europa.txt", 'w', encoding="utf-8") as f:
+        for key, value in riik_pealinn.items():
+            f.write(f"{key}-{value}\n")
+
+
+def game(riik_pealinn):
     win = 0
     max_len = len(list(riik_pealinn.keys()))
-    
-    for x in range(max_len):
+    num_questions = 5
+
+    for _ in range(num_questions):
         r = randint(0, max_len - 1)
 
         if randint(0, 5000) % 2 == 0:
@@ -54,65 +61,81 @@ def game():
         else:
             print("Неверно")
 
-    print(f"{(win / max_len) * 100}% ваш результат")
-    print()
+    print(f"Ваш результат: {(win / num_questions) * 100}%")
 
-def find():
-    sona = str(input("Введите слово: ")).capitalize()
+
+
+
+def find(riik_pealinn):
+    sona = input("Введите слово: ").capitalize()
 
     if sona in riik_pealinn:
         print(f"{sona} -> {riik_pealinn[sona]}")
     elif sona in riik_pealinn.values():
-        
         riik = [key for key, value in riik_pealinn.items() if value == sona][0]
         print(f"{sona} -> {riik}")
     else:
-        YN = str(input("Хотите добавить это слово в словарь? (y/n): "))
-        if YN[0].lower() == "y":
-            add(sona)
+        YN = input("Хотите добавить это слово в словарь? (y/n): ")
+        if YN.lower() == "y":
+            add(riik_pealinn)
 
-def add(sona):
+
+def add(riik_pealinn, sona):
     if sona != "":
+        riik = ""
+        pealinn = ""
         while True:
             option = str(input("R/l: ")).lower()
             if option[0] == "r":
-                r = sona
+                riik = str(input("Страна: ")).capitalize()
+                pealinn = str(input("Столица: ")).capitalize()
                 break
             elif option[0] == "l":
-                l = sona
-                break
-
-        while True:
-            if option[0] != "r":
-                riik = str(input("Страна?: ")).capitalize()
-            elif option[0] != "l":
                 pealinn = str(input("Столица: ")).capitalize()
-            print("\nВсе верно?")
-            option = input("Введите 'v' для подтверждения, 'q' для выхода: ").lower()
-            if option == "v":
-                riik_pealinn[riik] = pealinn
-                break
-            elif option == "q":
+                riik = str(input("Страна: ")).capitalize()
                 break
 
-def edit():
-    show()
+        print("\nВсе верно?")
+        option = input("Введите 'v' для подтверждения, 'q' для выхода: ").lower()
+        if option == "v":
+            riik_pealinn[riik] = pealinn
+        elif option == "q":
+            pass
+        else:
+            print("Неверный ввод. Пожалуйста, попробуйте снова.")
+
+
+
+
+
+
+
+
+
+
+def edit(riik_pealinn):
+    show(riik_pealinn)
     max_len = len(list(riik_pealinn.keys()))
-    pick = 0
-    while not (0 < pick <= max_len):
-        pick1 = str(input("Строка: "))
-        if pick1[0].lower() == "q":
-            break
-        if pick1.isnumeric():
-            pick = int(pick1)
-
-    lrp = list(riik_pealinn.keys())[pick - 1]
-    op = str(input("Тест: ")).capitalize()
+    
     while True:
-        if op[0].lower() == 'l':
-            nimi = str(input("Тест: ")).capitalize()
-            riik_pealinn[lrp] = nimi
+        pick_str = input("Введите номер строки для удаления или 'q' для выхода: ")
+        if pick_str.lower() == "q":
             break
-        elif op[0].lower() == 'r':
-            riik = str(input("Страна: ")).capitalize()
-            break
+        
+        if pick_str.isdigit():
+            pick = int(pick_str)
+            if 0 < pick <= max_len:
+                lrp = list(riik_pealinn.keys())[pick - 1]
+                del riik_pealinn[lrp]
+                print(f"Строка {pick} удалена.")
+                break
+            else:
+                print("Некорректный номер строки.")
+        else:
+            print("Некорректный ввод. Пожалуйста, введите число или 'q' для выхода.")
+
+
+
+
+
+
